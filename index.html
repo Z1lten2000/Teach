@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер слов - Стихийные бедствия</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .word-display {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 25px 0;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .word-display.correct {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .word-display.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .russian-word {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .input-container {
+            position: relative;
+            margin: 30px 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input.correct {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        input.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .primary-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .secondary-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .success-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .danger-btn {
+            background: #f44336;
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .result-message {
+            text-align: center;
+            margin-top: 15px;
+            min-height: 24px;
+            font-weight: 600;
+        }
+
+        .correct-message {
+            color: #4CAF50;
+        }
+
+        .incorrect-message {
+            color: #f44336;
+        }
+
+        .hint-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+
+        .result-screen {
+            text-align: center;
+        }
+
+        .result-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .result-text {
+            font-size: 24px;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .result-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .russian-word {
+                font-size: 28px;
+            }
+            
+            .result-circle {
+                width: 150px;
+                height: 150px;
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-bar" id="progressBar"></div>
+        
+        <!-- Экран тренировки -->
+        <div class="screen active" id="trainingScreen">
+            <div class="header">
+                <h1>Тренажер английских слов</h1>
+                <div class="subtitle">Тема: Стихийные бедствия</div>
+            </div>
+
+            <div class="word-display" id="wordDisplay">
+                <div class="russian-word" id="russianWord">ураган</div>
+                <div class="hint" id="hint">Введите перевод на английском</div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" id="answerInput" placeholder="Напишите перевод..." autocomplete="off">
+                <button class="hint-btn" id="hintBtn" onclick="showHint()">Подсказка</button>
+            </div>
+
+            <div class="result-message" id="resultMessage"></div>
+
+            <div class="button-group">
+                <button class="primary-btn" onclick="checkAnswer()">
+                    <span>✓ Проверить</span>
+                </button>
+                <button class="secondary-btn" onclick="nextWord()">
+                    <span>→ Дальше</span>
+                </button>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">Правильно</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="progress">1/8</div>
+                    <div class="stat-label">Прогресс</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="hintsLeft">3</div>
+                    <div class="stat-label">Подсказки</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Экран результатов -->
+        <div class="screen" id="resultScreen">
+            <div class="result-screen">
+                <h2>Результаты тренировки</h2>
+                
+                <div class="result-circle" id="resultCircle">
+                    <div id="resultPercentage">0%</div>
+                </div>
+                
+                <div class="result-text" id="resultText">Начинающий</div>
+                
+                <div class="result-details" id="resultDetails">
+                    <!-- Детали будут добавлены скриптом -->
+                </div>
+                
+                <div class="button-group">
+                    <button class="primary-btn" onclick="startNewTraining()">
+                        <span>🔄 Заново</span>
+                    </button>
+                    <button class="secondary-btn" onclick="shareResults()">
+                        <span>📤 Поделиться</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const words = [
+            {russian: "засуха", english: "drought"},
+            {russian: "наводнение", english: "flood"},
+            {russian: "торнадо", english: "tornado"},
+            {russian: "цунами", english: "tsunami"},
+            {russian: "землетрясение", english: "earthquake"},
+            {russian: "циклон", english: "cyclone"},
+            {russian: "лавина", english: "avalanche"},
+            {russian: "ураган", english: "hurricane"}
+        ];
+
+        let currentWords = [];
+        let currentIndex = 0;
+        let score = 0;
+        let hintsLeft = 3;
+        let currentAnswer = "";
+        let answered = false;
+        let results = [];
+
+        const trainingScreen = document.getElementById('trainingScreen');
+        const resultScreen = document.getElementById('resultScreen');
+        const russianWord = document.getElementById('russianWord');
+        const answerInput = document.getElementById('answerInput');
+        const resultMessage = document.getElementById('resultMessage');
+        const wordDisplay = document.getElementById('wordDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const scoreElement = document.getElementById('score');
+        const progressElement = document.getElementById('progress');
+        const hintsLeftElement = document.getElementById('hintsLeft');
+        const hintElement = document.getElementById('hint');
+        const resultCircle = document.getElementById('resultCircle');
+        const resultPercentage = document.getElementById('resultPercentage');
+        const resultText = document.getElementById('resultText');
+        const resultDetails = document.getElementById('resultDetails');
+
+        function init() {
+            startNewTraining();
+            
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !answered) {
+                    checkAnswer();
+                } else if (e.key === 'Enter' && answered) {
+                    nextWord();
+                }
+            });
+            
+            answerInput.focus();
+        }
+
+        function startNewTraining() {
+            // Перемешиваем слова случайным образом
+            currentWords = [...words].sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            score = 0;
+            hintsLeft = 3;
+            results = [];
+            
+            trainingScreen.classList.add('active');
+            resultScreen.classList.remove('active');
+            
+            updateWord();
+            updateStats();
+        }
+
+        function updateWord() {
+            const word = currentWords[currentIndex];
+            russianWord.textContent = word.russian;
+            currentAnswer = word.english;
+            answerInput.value = "";
+            answerInput.className = "";
+            answerInput.disabled = false;
+            wordDisplay.className = "word-display";
+            resultMessage.textContent = "";
+            resultMessage.className = "result-message";
+            hintElement.textContent = "Введите перевод на английском";
+            answered = false;
+            updateProgressBar();
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            answered = true;
+            
+            const isCorrect = userAnswer === currentAnswer.toLowerCase();
+            
+            if (isCorrect) {
+                score++;
+                answerInput.className = "correct";
+                wordDisplay.className = "word-display correct";
+                resultMessage.textContent = "✓ Отлично! Правильный ответ";
+                resultMessage.className = "result-message correct-message";
+            } else {
+                answerInput.className = "incorrect";
+                wordDisplay.className = "word-display incorrect";
+                resultMessage.textContent = `✗ Правильно: ${currentAnswer}`;
+                resultMessage.className = "result-message incorrect-message";
+            }
+            
+            // Сохраняем результат
+            results.push({
+                word: currentWords[currentIndex],
+                userAnswer: userAnswer,
+                correct: isCorrect
+            });
+            
+            answerInput.disabled = true;
+            updateStats();
+        }
+
+        function showHint() {
+            if (hintsLeft > 0 && !answered) {
+                hintsLeft--;
+                const firstLetter = currentAnswer[0];
+                hintElement.textContent = `Начинается с "${firstLetter.toUpperCase()}..."`;
+                updateStats();
+            }
+        }
+
+        function nextWord() {
+            if (!answered) return;
+            
+            currentIndex++;
+            
+            if (currentIndex >= currentWords.length) {
+                showResults();
+            } else {
+                updateWord();
+            }
+        }
+
+        function updateStats() {
+            scoreElement.textContent = score;
+            progressElement.textContent = `${currentIndex + 1}/${currentWords.length}`;
+            hintsLeftElement.textContent = hintsLeft;
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentIndex + 1) / currentWords.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showResults() {
+            trainingScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+            
+            const percentage = Math.round((score / currentWords.length) * 100);
+            
+            // Устанавливаем цвет круга в зависимости от результата
+            let circleColor, resultMessageText;
+            
+            if (percentage >= 90) {
+                circleColor = '#4CAF50';
+                resultMessageText = 'Отлично! 🌟';
+            } else if (percentage >= 70) {
+                circleColor = '#2196F3';
+                resultMessageText = 'Хорошо! 👍';
+            } else if (percentage >= 50) {
+                circleColor = '#FF9800';
+                resultMessageText = 'Неплохо! 😊';
+            } else {
+                circleColor = '#F44336';
+                resultMessageText = 'Попробуйте ещё раз! 💪';
+            }
+            
+            resultCircle.style.background = circleColor;
+            resultPercentage.textContent = `${percentage}%`;
+            resultText.textContent = resultMessageText;
+            
+            // Показываем детали
+            resultDetails.innerHTML = '';
+            results.forEach((result, index) => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                
+                const wordInfo = document.createElement('div');
+                wordInfo.textContent = `${result.word.russian} → ${result.word.english}`;
+                
+                const resultIcon = document.createElement('div');
+                resultIcon.textContent = result.correct ? '✓' : '✗';
+                resultIcon.style.color = result.correct ? '#4CAF50' : '#F44336';
+                resultIcon.style.fontWeight = 'bold';
+                
+                item.appendChild(wordInfo);
+                item.appendChild(resultIcon);
+                resultDetails.appendChild(item);
+            });
+        }
+
+        function shareResults() {
+            const percentage = Math.round((score / currentWords.length) * 100);
+            const text = `Я выучил ${score} из ${currentWords.length} слов по теме "Стихийные бедствия"! Результат: ${percentage}%`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Мои результаты тренировки',
+                    text: text,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Результаты скопированы в буфер обмена!');
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
